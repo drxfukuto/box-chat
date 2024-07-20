@@ -1,59 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Socket.IO Chat</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+  <title>Chat Room</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    #chat-container {
+      height: 300px;
+      overflow-y: scroll;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    #message-input {
+      width: 80%;
+      padding: 5px;
+    }
+    #send-button {
+      width: 20%;
+      padding: 5px;
+    }
+  </style>
 </head>
 <body>
-  <div class="chat-container">
-    <div class="chat-header">
-      <h2>Socket.IO Chat</h2>
-    </div>
-    <div class="chat-messages">
-      <ul id="chatMessages"></ul>
-    </div>
-    <div class="chat-input">
-      <input type="text" id="usernameInput" placeholder="Enter your username">
-      <input type="text" id="messageInput" placeholder="Enter your message">
-      <button id="sendButton">Send</button>
-    </div>
-  </div>
+  <h1>Chat Room</h1>
+  <input type="text" id="username-input" placeholder="Enter your username">
+  <button id="join-button">Join</button>
+  <div id="chat-container"></div>
+  <input type="text" id="message-input" placeholder="Enter your message">
+  <button id="send-button">Send</button>
 
   <script>
-    // Initialize socket.io client connection
     const socket = io();
+    const chatContainer = document.getElementById('chat-container');
+    const usernameInput = document.getElementById('username-input');
+    const joinButton = document.getElementById('join-button');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
 
-    // Get the necessary DOM elements
-    const usernameInput = document.getElementById('usernameInput');
-    const messageInput = document.getElementById('messageInput');
-    const sendButton = document.getElementById('sendButton');
-    const chatMessages = document.getElementById('chatMessages');
-
-    // Handle the connection event
-    socket.on('connect', () => {
-      console.log('Connected to server');
-
-      // Handle the event of receiving a message from the server
-      socket.on('chat message', (data) => {
-        const { username, message } = data;
-        const messageElement = document.createElement('li');
-        messageElement.textContent = `${username}: ${message}`;
-        chatMessages.insertBefore(messageElement, chatMessages.firstChild);
-      });
+    joinButton.addEventListener('click', () => {
+      const username = usernameInput.value.trim();
+      if (username) {
+        socket.emit('join', username);
+        usernameInput.disabled = true;
+        joinButton.disabled = true;
+      }
     });
 
-    // Handle the event of sending a message
     sendButton.addEventListener('click', () => {
-      const username = usernameInput.value;
-      const message = messageInput.value;
-      if (username && message) {
-        socket.emit('chat message', { username, message });
+      const message = messageInput.value.trim();
+      if (message) {
+        socket.emit('chat message', message);
         messageInput.value = '';
       }
     });
 
-    socket.on('disconnect', () => {
-      console.log('Disconnected from server');
+    socket.on('user joined', (username) => {
+      chatContainer.innerHTML += `<div>${username} has joined the chat.</div>`;
+    });
+
+    socket.on('chat message', ({ username, message }) => {
+      chatContainer.innerHTML += `<div><strong>${username}:</strong> ${message}</div>`;
+    });
+
+    socket.on('user left', (username) => {
+      chatContainer.innerHTML += `<div>${username} has left the chat.</div>`;
     });
   </script>
 </body>

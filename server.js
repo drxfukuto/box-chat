@@ -1,4 +1,4 @@
-// Server-side (server.js)
+// Phía server (server.js)
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
@@ -6,17 +6,24 @@ const io = require('socket.io')(http);
 
 const users = new Map(); // Lưu trữ danh sách người dùng
 
+// Định nghĩa route cho trang chủ
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/frontend/index.html');
+});
+
 io.on('connection', (socket) => {
   console.log('A user connected');
 
   socket.on('join', (username) => {
     users.set(socket.id, username);
-    io.emit('user joined', username); // Thông báo tới tất cả người dùng
+    io.emit('user joined', username); // Thông báo tới tất cả người dùng 
+    console.log(username,'join');
   });
 
   socket.on('chat message', (message) => {
     const username = users.get(socket.id);
     io.emit('chat message', { username, message }); // Gửi tin nhắn tới tất cả người dùng
+    console.log(username,message);
   });
 
   socket.on('disconnect', () => {

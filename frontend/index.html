@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket.IO Chat</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f2f2f2;
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .chat-header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .chat-header h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .chat-messages {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .chat-messages li {
+      list-style-type: none;
+      background-color: #f1f1f1;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    .chat-input {
+      display: flex;
+      padding: 10px;
+      background-color: #f1f1f1;
+    }
+
+    .chat-input input {
+      flex-grow: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      outline: none;
+      border-radius: 5px;
+    }
+
+    .chat-input button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .user-list {
+      background-color: #f1f1f1;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2>Socket.IO Chat</h2>
+    </div>
+    <div class="chat-messages">
+      <ul id="chatMessages"></ul>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="usernameInput" placeholder="Enter your username">
+      <input type="text" id="messageInput" placeholder="Enter your message">
+      <button id="sendButton">Send</button>
+    </div>
+  </div>
+
+  <script>
+    // Initialize socket.io client connection
+    const socket = io();
+
+    // Get the necessary DOM elements
+    const usernameInput = document.getElementById('usernameInput');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const chatMessages = document.getElementById('chatMessages');
+
+    // Handle the connection event
+    socket.on('connect', () => {
+      console.log('Connected to server');
+
+      // Handle the event of receiving a message from the server
+      socket.on('chat message', (data) => {
+        const { username, message } = data;
+        const messageElement = document.createElement('li');
+        messageElement.textContent = `${username}: ${message}`;
+        chatMessages.insertBefore(messageElement, chatMessages.firstChild);
+      });
+    });
+
+    // Handle the event of sending a message
+    sendButton.addEventListener('click', () => {
+      const username = usernameInput.value;
+      const message = messageInput.value;
+      if (username && message) {
+        socket.emit('chat message', { username, message });
+        messageInput.value = '';
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server');
+    });
+  </script>
+</body>
+</html>

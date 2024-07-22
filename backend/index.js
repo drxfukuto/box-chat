@@ -2,9 +2,9 @@ const mysql = require('mysql2');
 
 // Tạo kết nối đến MySQL
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root', // Tên người dùng MySQL của bạn
-  password: '123123@', // Mật khẩu MySQL của bạn
+  host: 'http://127.0.0.1/',
+  user: 'sql_myboxchat_cc', // Tên người dùng MySQL của bạn
+  password: '58c08935760bb', // Mật khẩu MySQL của bạn
   database: 'mydatabase'
 });
 
